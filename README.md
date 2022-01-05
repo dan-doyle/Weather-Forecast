@@ -1,7 +1,18 @@
 # Weather-Forecast
+This project consists of running a WRF ([Weather Research and Forecasting](https://www.mmm.ucar.edu/weather-research-and-forecasting-model)) model using Orr2, University College Dublin’s High Performance Computing Cluster. Please see the full forecast report [here](https://github.com/dan-doyle/Weather-Forecast/blob/main/Forecast%20report.pdf).
+
+## Brief Forecast Methodology
+- Download global forecast data from the GFS global forecast model through [UCAR](https://rda.ucar.edu/index.html?hash=data_user&action=register)
+- Load and use WPS, a module for WRF pre-processing ([see more information](https://github.com/wrf-model/WPS/blob/master/README))
+    - Update the [namelist.wps](https://github.com/dan-doyle/Weather-Forecast/blob/main/namelist.wps) file to have correct date / time of forecast and longitude / latitude of weather station. Here we chose [London City Airport](https://rp5.ru/Weather_in_London_City_(airport)) ([more information about namelist.wps](https://www2.mmm.ucar.edu/wrf/users/namelist_best_prac_wps.html))
+    - Link GFS data to the WPS directory 
+    - Within WPS run three programs: 1. Geogrid.exe 2. UNGRIB.exe  3. Metgrid.exe
+- Edit the [namelist.input](https://github.com/dan-doyle/Weather-Forecast/blob/main/namelist.input) file to have correct start and end date for forecast and the time interval at which to output forecast data (here we chose hourly) 
+- Run the initialisation program Real.exe. Following this, submit the WRF model forecast task to the Orr2 queue ([information on commands](https://www2.mmm.ucar.edu/wrf/OnLineTutorial/index.php))
+- Once finished, a wrfout.nc file is created with a forecast output. The wrfout.nc file is too large to upload to the repository however, we see exploratory analysis of the file below
 
 
-
+## Exploratory Analysis
 ```python
 import numpy as np
 import xarray as xr
@@ -19,263 +30,27 @@ WRFdat = xr.open_dataset('/Users/daniel/wrfout.nc')
 ```
 
 
-```python
-WRFdat
-```
-
-
-
-
-<pre>&lt;xarray.Dataset&gt;
-Dimensions:                (Time: 25, bottom_top: 32, bottom_top_stag: 33, seed_dim_stag: 8, soil_layers_stag: 4, south_north: 60, south_north_stag: 61, west_east: 73, west_east_stag: 74)
-Coordinates:
-    XLAT                   (Time, south_north, west_east) float32 ...
-    XLONG                  (Time, south_north, west_east) float32 ...
-    XTIME                  (Time) datetime64[ns] ...
-    XLAT_U                 (Time, south_north, west_east_stag) float32 ...
-    XLONG_U                (Time, south_north, west_east_stag) float32 ...
-    XLAT_V                 (Time, south_north_stag, west_east) float32 ...
-    XLONG_V                (Time, south_north_stag, west_east) float32 ...
-Dimensions without coordinates: Time, bottom_top, bottom_top_stag, seed_dim_stag, soil_layers_stag, south_north, south_north_stag, west_east, west_east_stag
-Data variables:
-    Times                  (Time) |S19 ...
-    LU_INDEX               (Time, south_north, west_east) float32 ...
-    ZNU                    (Time, bottom_top) float32 ...
-    ZNW                    (Time, bottom_top_stag) float32 ...
-    ZS                     (Time, soil_layers_stag) float32 ...
-    DZS                    (Time, soil_layers_stag) float32 ...
-    VAR_SSO                (Time, south_north, west_east) float32 ...
-    U                      (Time, bottom_top, south_north, west_east_stag) float32 ...
-    V                      (Time, bottom_top, south_north_stag, west_east) float32 ...
-    W                      (Time, bottom_top_stag, south_north, west_east) float32 ...
-    PH                     (Time, bottom_top_stag, south_north, west_east) float32 ...
-    PHB                    (Time, bottom_top_stag, south_north, west_east) float32 ...
-    T                      (Time, bottom_top, south_north, west_east) float32 ...
-    MAX_MSTFX              (Time) float32 ...
-    MAX_MSTFY              (Time) float32 ...
-    RAINC                  (Time, south_north, west_east) float32 ...
-    RAINSH                 (Time, south_north, west_east) float32 ...
-    RAINNC                 (Time, south_north, west_east) float32 ...
-    SNOWNC                 (Time, south_north, west_east) float32 ...
-    GRAUPELNC              (Time, south_north, west_east) float32 ...
-    HAILNC                 (Time, south_north, west_east) float32 ...
-    CLDFRA                 (Time, bottom_top, south_north, west_east) float32 ...
-    SWDOWN                 (Time, south_north, west_east) float32 ...
-    GLW                    (Time, south_north, west_east) float32 ...
-    SWNORM                 (Time, south_north, west_east) float32 ...
-
-Attributes:
-    TITLE:                            OUTPUT FROM WRF V4.1.4 MODEL
-    START_DATE:                      2020-03-13_00:00:00
-    SIMULATION_START_DATE:           2020-03-13_00:00:00
-    WEST-EAST_GRID_DIMENSION:        74
-    SOUTH-NORTH_GRID_DIMENSION:      61
-    BOTTOM-TOP_GRID_DIMENSION:       33
-    DX:                              30000.0
-    DY:                              30000.0
-    AERCU_OPT:                       0
-    AERCU_FCT:                       1.0
-    IDEAL_CASE:                      0
-    DIFF_6TH_SLOPEOPT:               0
-    AUTO_LEVELS_OPT:                 2
-    DIFF_6TH_THRESH:                 0.1
-    DZBOT:                           50.0
-    DZSTRETCH_S:                     1.3
-    DZSTRETCH_U:                     1.1
-    SKEBS_ON:                        0
-    SPEC_BDY_FINAL_MU:               1
-    USE_Q_DIABATIC:                  0
-    GRIDTYPE:                        C
-    DIFF_OPT:                        1
-    KM_OPT:                          4
-    DAMP_OPT:                        3
-    DAMPCOEF:                        0.2
-    KHDIF:                           0.0
-    KVDIF:                           0.0
-    MP_PHYSICS:                      8
-    RA_LW_PHYSICS:                   4
-    RA_SW_PHYSICS:                   4
-    SF_SFCLAY_PHYSICS:               2
-    SF_SURFACE_PHYSICS:              2
-    BL_PBL_PHYSICS:                  2
-    CU_PHYSICS:                      6
-    SF_LAKE_PHYSICS:                 0
-    SURFACE_INPUT_SOURCE:            3
-    SST_UPDATE:                      0
-    GRID_FDDA:                       0
-    GFDDA_INTERVAL_M:                0
-    GFDDA_END_H:                     0
-    GRID_SFDDA:                      0
-    SGFDDA_INTERVAL_M:               0
-    SGFDDA_END_H:                    0
-    HYPSOMETRIC_OPT:                 2
-    USE_THETA_M:                     1
-    GWD_OPT:                         1
-    SF_URBAN_PHYSICS:                0
-    SF_SURFACE_MOSAIC:               0
-    SF_OCEAN_PHYSICS:                0
-    SHCU_PHYSICS:                    0
-    MFSHCONV:                        0
-    FEEDBACK:                        1
-    SMOOTH_OPTION:                   0
-    SWRAD_SCAT:                      1.0
-    W_DAMPING:                       0
-    DT:                              180.0
-    RADT:                            30.0
-    BLDT:                            0.0
-    CUDT:                            5.0
-    AER_OPT:                         0
-    SWINT_OPT:                       0
-    AER_TYPE:                        1
-    AER_AOD550_OPT:                  1
-    AER_ANGEXP_OPT:                  1
-    AER_SSA_OPT:                     1
-    AER_ASY_OPT:                     1
-    AER_AOD550_VAL:                  0.12
-    AER_ANGEXP_VAL:                  1.3
-    AER_SSA_VAL:                     0.85
-    AER_ASY_VAL:                     0.9
-    MOIST_ADV_OPT:                   1
-    SCALAR_ADV_OPT:                  1
-    TKE_ADV_OPT:                     1
-    DIFF_6TH_OPT:                    0
-    DIFF_6TH_FACTOR:                 0.12
-    OBS_NUDGE_OPT:                   0
-    BUCKET_MM:                       -1.0
-    BUCKET_J:                        -1.0
-    PREC_ACC_DT:                     0.0
-    ISFTCFLX:                        0
-    ISHALLOW:                        0
-    ISFFLX:                          1
-    ICLOUD:                          1
-    ICLOUD_CU:                       0
-    TRACER_PBLMIX:                   1
-    SCALAR_PBLMIX:                   0
-    YSU_TOPDOWN_PBLMIX:              0
-    GRAV_SETTLING:                   0
-    DFI_OPT:                         0
-    SIMULATION_INITIALIZATION_TYPE:  REAL-DATA CASE
-    WEST-EAST_PATCH_START_UNSTAG:    1
-    WEST-EAST_PATCH_END_UNSTAG:      73
-    WEST-EAST_PATCH_START_STAG:      1
-    WEST-EAST_PATCH_END_STAG:        74
-    SOUTH-NORTH_PATCH_START_UNSTAG:  1
-    SOUTH-NORTH_PATCH_END_UNSTAG:    60
-    SOUTH-NORTH_PATCH_START_STAG:    1
-    SOUTH-NORTH_PATCH_END_STAG:      61
-    BOTTOM-TOP_PATCH_START_UNSTAG:   1
-    BOTTOM-TOP_PATCH_END_UNSTAG:     32
-    BOTTOM-TOP_PATCH_START_STAG:     1
-    BOTTOM-TOP_PATCH_END_STAG:       33
-    GRID_ID:                         1
-    PARENT_ID:                       0
-    I_PARENT_START:                  1
-    J_PARENT_START:                  1
-    PARENT_GRID_RATIO:               1
-    CEN_LAT:                         51.50298
-    CEN_LON:                         0.05529785
-    TRUELAT1:                        46.50298
-    TRUELAT2:                        5.0553
-    MOAD_CEN_LAT:                    51.50298
-    STAND_LON:                       0.0553
-    POLE_LAT:                        90.0
-    POLE_LON:                        0.0
-    GMT:                             0.0
-    JULYR:                           2020
-    JULDAY:                          73
-    MAP_PROJ:                        1
-    MAP_PROJ_CHAR:                   Lambert Conformal
-    MMINLU:                          MODIFIED_IGBP_MODIS_NOAH
-    NUM_LAND_CAT:                    21
-    ISWATER:                         17
-    ISLAKE:                          21
-    ISICE:                           15
-    ISURBAN:                         13
-    ISOILWATER:                      14
-    HYBRID_OPT:                      2
-    ETAC:                            0.2</pre>
-
-
 
 
 ```python
-WRFdat.T2
-# Look at the dimensions of the wind variable 'U' and 'V'
-# Do we notice anything different?
-# How does this relate to our earlier discussion about different types of grids?
-```
+# We use the Cartopy library to plot data https://scitools.org.uk/cartopy/docs/latest/
+# When creating axes using plt.axes, we pass the name of the Cartopy projection: ccrs.Mercator()
 
-
-
-
-<pre>&lt;xarray.DataArray &#x27;T2&#x27; (Time: 25, south_north: 60, west_east: 73)&gt;
-[109500 values with dtype=float32]
-Coordinates:
-    XLAT     (Time, south_north, west_east) float32 ...
-    XLONG    (Time, south_north, west_east) float32 ...
-    XTIME    (Time) datetime64[ns] ...
-Dimensions without coordinates: Time, south_north, west_east
-Attributes:
-    FieldType:    104
-    MemoryOrder:  XY 
-    description:  TEMP at 2 M
-    units:        K
-    stagger:      </pre>
-
-
-
-
-```python
-t2m = WRFdat.T2[0,:,:]
-lons = WRFdat.XLONG[0,:,:]
-lats = WRFdat.XLAT[0,:,:]
-```
-
-
-```python
-WRFdat.U
-# The difference we notice is that instead of memory order XY, we have XYZ, meaning that we record the wind
-# at a certain altitude as well
-
-# This relates to the discussion about different types of grids in that....
-```
-
-
-
-
-<pre>&lt;xarray.DataArray &#x27;U&#x27; (Time: 25, bottom_top: 32, south_north: 60, west_east_stag: 74)&gt;
-[3552000 values with dtype=float32]
-Coordinates:
-    XTIME    (Time) datetime64[ns] ...
-    XLAT_U   (Time, south_north, west_east_stag) float32 ...
-    XLONG_U  (Time, south_north, west_east_stag) float32 ...
-Dimensions without coordinates: Time, bottom_top, south_north, west_east_stag
-Attributes:
-    FieldType:    104
-    MemoryOrder:  XYZ
-    description:  x-wind component
-    units:        m s-1
-    stagger:      X</pre>
-
-
-
-
-```python
 fig = plt.figure(figsize=[8,6])
 ax = plt.axes(projection=ccrs.Mercator())
 
 ax.coastlines(resolution='50m', color='black',linewidth=0.5)
 
 ax.set_extent([lons.values.min(),lons.values.max(), lats.values.min()-2, lats.values.max()])
-
+# WRF temperature is set to Kelvin, we subtract 273.15 to set to C
 cf = ax.contourf(lons, lats, t2m-273.15, transform=ccrs.PlateCarree())
-
+# When plotting WRF data, we need to tell Cartopy that it is on its own grid. The transorm=ccrs.PlateCarree() command does this
 plt.colorbar(cf, shrink=0.75)
 
 grd = ax.gridlines(draw_labels=True, linestyle='--')
 grd.xlabels_top=False
 grd.ylabels_right=False
-    
+# Temperate plot (Celsius)
 ```
 
 
@@ -303,6 +78,7 @@ plt.clabel(t_cl,inline=1,fontsize=20,fmt='%1.0f',inline_spacing=1,colors='black'
 grd = ax.gridlines(draw_labels=True)
 grd.xlabels_top = False
 grd.ylabels_right = False
+# Here we try plotting the temperature (Celsius) with contour lines however, we see this gets messy
 ```
 
 
@@ -324,7 +100,7 @@ surfp = WRFdat.PSFC[0,:,:]  # atmospheric pressure at the ground
 
 
 ```python
-surft = t2m + (6.5*z/1000)  # create 'surft' variable representing atmospheric pressure (where)...?
+surft = t2m + (6.5*z/1000)  
 mslp = surfp*np.exp(9.81/(287.0*surft)*z)*0.01 + (6.7*z/ 1000)   
 # The MSLP variable is the Mean Sea Level Pressure variable which is used to show
 # regions of low and high pressure
@@ -332,10 +108,10 @@ mslp = surfp*np.exp(9.81/(287.0*surft)*z)*0.01 + (6.7*z/ 1000)
 
 
 ```python
-fig = plt.figure(figsize=[8,6])   # What do these mean
+fig = plt.figure(figsize=[8,6])   
 ax = plt.axes(projection=ccrs.Mercator())
 
-ax.coastlines(resolution='50m',color='black',linewidth=0.5)  # meaning?
+ax.coastlines(resolution='50m',color='black',linewidth=0.5)  
 
 ax.set_extent([lons.values.min(),lons.values.max(), lats.values.min()-2, lats.values.max()])
 
@@ -349,6 +125,7 @@ plt.clabel(mslp_cl,inline=1,fontsize=10,fmt='%1.0f',inline_spacing=1,colors='bla
 grd = ax.gridlines(draw_labels=True)
 grd.xlabels_top = False
 grd.ylabels_right = False
+# Plotting Contours of Mean Sea Level Pressure (MSLP) 
 ```
 
 
@@ -395,6 +172,7 @@ grd.xlabels_top=False
 grd.ylabels_right=False
 
 plt.title("Transect for cross-section plot")
+# Plot 10-metre wind speed and transect through the location of maximum wind
 ```
 
 
@@ -440,6 +218,7 @@ lons_new = np.tile(lons[iwsmx,:], (32,1))
 
 
 ```python
+# Plot a vertical cross-section of wind speed along the transect shown in the above plot
 fig = plt.figure(figsize=[8,6])
 ax = plt.axes()
 
